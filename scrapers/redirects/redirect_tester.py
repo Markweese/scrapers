@@ -19,7 +19,7 @@ with open('urls.csv', 'r') as csv_file:
         req = Request(url=clean_url, headers=headers)
         status = urlopen(req).getcode()
 
-      # catch 404s
+      # catch 404s and whatever else
       except HTTPError as error:
         status = error.code
 

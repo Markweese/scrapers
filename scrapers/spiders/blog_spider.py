@@ -35,7 +35,6 @@ class Blog(scrapy.Spider):
       month_clean = str(month_dict[month]).zfill(2)
       # year is all good
       year = article.css('span.year *::text').extract_first()
-      # Format URL
       url = article.css('a::attr(href)').extract_first()
 
       post['url'] = url
