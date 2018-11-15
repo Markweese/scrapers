@@ -38,7 +38,7 @@ class Blog(scrapy.Spider):
       url = article.css('a::attr(href)').extract_first()
 
       post['url'] = url
-      post['date'] = f'{day}/{month_clean}/{year}'
+      post['date'] = f'{month_clean}/{day}/{year}'
       post['title'] = article.css('h2.post-title a::attr(title)').extract_first()
       post['image'] = article.css('figure.post-image a img::attr(src)').extract_first()
 
