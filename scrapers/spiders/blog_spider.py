@@ -1,12 +1,18 @@
+import re
 import scrapy
 import calendar
 
 class PostItem(scrapy.Item):
+    handle = scrapy.Field()
+    command = scrapy.Field()
     title = scrapy.Field()
-    image = scrapy.Field()
-    date = scrapy.Field()
-    url = date = scrapy.Field()
-    content = scrapy.Field()
+    body_html = scrapy.Field()
+    summary_html = scrapy.Field()
+    tags = scrapy.Field()
+    published = scrapy.Field()
+    published_at = scrapy.Field()
+    image_src = scrapy.Field()
+    image_alt = scrapy.Field()
 
 
 class Blog(scrapy.Spider):
@@ -31,16 +37,34 @@ class Blog(scrapy.Spider):
       # Format date, z-fill adds leading 0 for single digit
       day = article.css('span.day *::text').extract_first().zfill(2)
       # Swap month to number with month_dict
-      month = article.css('span.month *::text').extract_first()
-      month_clean = str(month_dict[month]).zfill(2)
+      month_raw = article.css('span.month *::text').extract_first()
+      month_clean = str(month_dict[month_raw]).zfill(2)
       # year is all good
       year = article.css('span.year *::text').extract_first()
+      # extract URL handle for Shopify
       url = article.css('a::attr(href)').extract_first()
+      url_arr = url.split('/')
+      url_handle = url_arr[len(url_arr) - 2]
+      # parse tags from article class
+      classes_raw = article.css('::attr(class)').extract_first()
+      classes_tagged = [tag for tag in classes_raw.split() if tag.startswith('tag-')]
+      # remove tag- prefix from tag
+      classes_clean = [string.replace('tag-', '') for string in classes_tagged]
+      tags = ','.join(classes_clean)
+      # make image sources generic
+      prefix = 'https://www.newtonrunning.com'
+      image_src_raw = article.css('figure.post-image a img::attr(src)').extract_first()
+      image_src = image_src_raw if image_src_raw.startswith('http') else prefix + image_src_raw
 
-      post['url'] = url
-      post['date'] = f'{month_clean}/{day}/{year}'
+
+      post['handle'] = url_handle
+      post['command'] = 'NEW'
       post['title'] = article.css('h2.post-title a::attr(title)').extract_first()
-      post['image'] = article.css('figure.post-image a img::attr(src)').extract_first()
+      post['tags'] = tags
+      post['published'] = 'TRUE'
+      post['published_at'] = f'{month_clean}/{day}/{year}'
+      post['image_src'] = image_src
+      post['image_alt'] = article.css('figure.post-image a img::attr(alt)').extract_first()
 
       yield scrapy.Request(
           url,
@@ -51,5 +75,10 @@ class Blog(scrapy.Spider):
 
   def parse_post(self, response):
     post = response.meta.get('post_item')
-    post['content'] = response.css('div.entry-content').extract_first()
+    content_raw = response.css('div.entry-content').extract_first()
+    html_removed = re.sub('<[^<]+?>', '', content_raw)
+    content_clean = re.sub('\s+',' ', html_removed)
+    content_summary = content_clean[0:300]
+    post['summary_html'] = content_summary
+    post['body_html'] = content_raw
     yield post
