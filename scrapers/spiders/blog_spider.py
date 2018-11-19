@@ -45,11 +45,11 @@ class Blog(scrapy.Spider):
       url = article.css('a::attr(href)').extract_first()
       url_arr = url.split('/')
       url_handle = url_arr[len(url_arr) - 2]
-      # parse tags from article class
+      # parse category as tag from the article class
       classes_raw = article.css('::attr(class)').extract_first()
-      classes_tagged = [tag for tag in classes_raw.split() if tag.startswith('tag-')]
-      # remove tag- prefix from tag
-      classes_clean = [string.replace('tag-', '') for string in classes_tagged]
+      classes_categorized = [tag for tag in classes_raw.split() if tag.startswith('category-')]
+      # remove category- prefix from tag
+      classes_clean = [string.replace('category-', '') for string in classes_categorized]
       tags = ','.join(classes_clean)
       # make image sources generic
       prefix = 'https://www.newtonrunning.com'
