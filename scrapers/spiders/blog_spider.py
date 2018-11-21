@@ -13,6 +13,9 @@ class PostItem(scrapy.Item):
     published_at = scrapy.Field()
     image_src = scrapy.Field()
     image_alt = scrapy.Field()
+    # # For use in the excelify redirects sheet
+    # path = scrapy.Field()
+    # target = scrapy.Field()
 
 
 class Blog(scrapy.Spider):
@@ -45,7 +48,10 @@ class Blog(scrapy.Spider):
       url = article.css('a::attr(href)').extract_first()
       url_arr = url.split('/')
       url_handle = url_arr[len(url_arr) - 2]
-      # parse category as tag from the article class
+      # clean urls for redirects
+      url_path = '/' + '/'.join(url_arr[3:len(url_arr)])
+      url_target = f'/blogs/news/{url_handle}'
+      # parse categories as tags from the article class
       classes_raw = article.css('::attr(class)').extract_first()
       classes_categorized = [tag for tag in classes_raw.split() if tag.startswith('category-')]
       # remove category- prefix from tag
@@ -54,7 +60,13 @@ class Blog(scrapy.Spider):
       # make image sources generic
       prefix = 'https://www.newtonrunning.com'
       image_src_raw = article.css('figure.post-image a img::attr(src)').extract_first()
-      image_src = image_src_raw if image_src_raw.startswith('http') else prefix + image_src_raw
+
+      if image_src_raw:
+        image_src = image_src_raw if image_src_raw.startswith('http') else prefix + image_src_raw
+        image_alt = article.css('figure.post-image a img::attr(alt)').extract_first()
+
+        post['image_src'] = image_src
+        post['image_alt'] = image_alt
 
 
       post['handle'] = url_handle
@@ -62,9 +74,10 @@ class Blog(scrapy.Spider):
       post['title'] = article.css('h2.post-title a::attr(title)').extract_first()
       post['tags'] = tags
       post['published'] = 'TRUE'
-      post['published_at'] = f'{month_clean}/{day}/{year}'
-      post['image_src'] = image_src
-      post['image_alt'] = article.css('figure.post-image a img::attr(alt)').extract_first()
+      post['published_at'] = f'{year}-{month_clean}-{day}'
+      # For use in the excelify redirects sheet
+      # post['path'] = url_path
+      # post['target'] = url_target
 
       yield scrapy.Request(
           url,
@@ -78,7 +91,7 @@ class Blog(scrapy.Spider):
     content_raw = response.css('div.entry-content').extract_first()
     html_removed = re.sub('<[^<]+?>', '', content_raw)
     content_clean = re.sub('\s+',' ', html_removed)
-    content_summary = content_clean[0:300]
+    content_summary = content_clean[0:300] + '...'
     post['summary_html'] = content_summary
     post['body_html'] = content_raw
     yield post
