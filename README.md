@@ -1,6 +1,6 @@
 # Primary Scrapers
-1(Blog Content). Exports WordPress blog pages into a CSV filed to be parsed into Shopify with [excelify](excelifiy.io).
-2(URL Redirects). Exports redirects for WordPress individual blog, blog category, and blog tag pages for Shopify integration using [excelify](excelifiy.io).
+1. (Blog Content) Exports WordPress blog pages into a CSV filed to be parsed into Shopify with [excelify](excelifiy.io).
+2. (URL Redirects) Exports redirects for WordPress individual blog, blog category, and blog tag pages for Shopify integration using [excelify](excelifiy.io).
 
 # Basic Setup
 This repo uses scrapy, here is an [installation reference](https://doc.scrapy.org/en/latest/intro/install.html#mac-os-x)
