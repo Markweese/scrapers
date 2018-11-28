@@ -15,9 +15,6 @@ class PostItem(scrapy.Item):
     image_alt = scrapy.Field()
     author = scrapy.Field()
     blog_commentable = scrapy.Field()
-    # # For use in the excelify redirects sheet
-    path = scrapy.Field()
-    target = scrapy.Field()
 
 
 class Blog(scrapy.Spider):
@@ -33,7 +30,6 @@ class Blog(scrapy.Spider):
     current_page += 1
 
   def parse(self, response):
-    # set up a  dictionary of month abbr/value pairs to pull from below
 
     for article in response.css('div.loops-wrapper article'):
       post = PostItem()
@@ -66,9 +62,6 @@ class Blog(scrapy.Spider):
       post['blog_commentable'] = 'moderate'
       post['image_src'] = cover_image['src']
       post['image_alt'] = cover_image['alt']
-      # For use in the excelify redirects sheet
-      post['path'] = url_data['path']
-      post['target'] = url_data['target']
 
       yield scrapy.Request(
           url_data['url'],
@@ -82,6 +75,7 @@ class Blog(scrapy.Spider):
     content_raw = response.css('div.entry-content').extract_first()
     body_html = self.format_image_nested(content_raw)
     post['body_html'] = body_html
+
     yield post
 
   def format_image_nested(self, content):
@@ -136,12 +130,7 @@ class Blog(scrapy.Spider):
       url_arr = url.split('/')
       url_handle = url_arr[len(url_arr) - 2]
 
-      # clean urls for redirects
-      url_path = '/' + '/'.join(url_arr[3:len(url_arr)])
-      url_target = f'/blogs/blog/{url_handle}'
-
-      return {'url': url,
+      return {
+              'url': url,
               'handle': url_handle,
-              'path': url_path,
-              'target': url_target
             }
