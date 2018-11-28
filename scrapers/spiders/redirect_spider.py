@@ -36,12 +36,16 @@ class Redirect(scrapy.Spider):
       url = urlItem()
       url_data = self.format_url(article)
 
-      url['ID'] = ''
-      url['Command'] = 'NEW'
-      url['Path'] = url_data['path']
-      url['Target'] = url_data['target']
+      for category in new_categories:
+        url_data['category'] = category
 
-      yield url
+        # blog/category/post
+        url['ID'] = ''
+        url['Command'] = 'NEW'
+        url['Path'] = '/blog/%(category)s/%(handle)s' % url_data
+        url['Target'] = url_data['target']
+
+        yield url
 
     for category in self.remove_duplicates(category_arr):
       url = urlItem()
@@ -72,6 +76,7 @@ class Redirect(scrapy.Spider):
       url_target = f'/blogs/blog/{url_handle}'
 
       return {
+              'handle': url_handle,
               'path': url_path,
               'target': url_target
             }
@@ -83,3 +88,6 @@ class Redirect(scrapy.Spider):
     categories = [string.replace(f'{cat_type}-', '') for string in classes_categorized]
 
     return categories
+
+  def remove_duplicates(self, items):
+    return list(set(items))
