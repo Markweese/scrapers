@@ -1,5 +1,5 @@
 # scrapers
-This scrapes blog pages/staging sites for the purpose of content transfer and 404 testing primarily
+This exports WordPress blog pages into a CSV filed that is then parsed into Shopify with [excelify](excelifiy.io).
 
 - This repo uses scrapy, here is an [installation reference](https://doc.scrapy.org/en/latest/intro/install.html#mac-os-x)
 - In `scrapers > spiders > blog_spider` you can adjust settings to scrape desired sites
