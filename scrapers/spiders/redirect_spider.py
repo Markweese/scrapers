@@ -7,8 +7,6 @@ class urlItem(scrapy.Item):
     ID = scrapy.Field()
     Command = scrapy.Field()
 
-
-
 class Redirect(scrapy.Spider):
   name = 'redirect'
   max_pages = 18
@@ -23,10 +21,10 @@ class Redirect(scrapy.Spider):
 
   def parse(self, response):
     blog_name = 'blog'
-    url_category_start = 'https://www.newtonrunning.com/blog/'
-    url_category_target = f'https://newtonrunning.myshopify.com/blogs/{blog_name}/tagged/'
-    url_tag_start = 'https://www.newtonrunning.com/blog/tag/'
-    url_tag_target = f'https://newtonrunning.myshopify.com/blogs/{blog_name}/'
+    url_category_start = '/blog/'
+    url_category_target = f'/blogs/{blog_name}/tagged/'
+    url_tag_start = '/blog/tag/'
+    url_tag_target = f'/blogs/{blog_name}/'
     category_arr = []
     tag_arr = []
 
@@ -45,7 +43,7 @@ class Redirect(scrapy.Spider):
 
       yield url
 
-    for category in self.uniquify(category_arr):
+    for category in self.remove_duplicates(category_arr):
       url = urlItem()
 
       url['ID'] = ''
@@ -55,7 +53,7 @@ class Redirect(scrapy.Spider):
 
       yield url
 
-    for tag in self.uniquify(tag_arr):
+    for tag in self.remove_duplicates(tag_arr):
       url = urlItem()
 
       url['ID'] = ''
@@ -85,6 +83,3 @@ class Redirect(scrapy.Spider):
     categories = [string.replace(f'{cat_type}-', '') for string in classes_categorized]
 
     return categories
-
-  def uniquify(self, items):
-    return list(set(items))
