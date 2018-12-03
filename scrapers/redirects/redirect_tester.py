@@ -1,4 +1,5 @@
 from urllib.request import urlopen, Request, HTTPError
+from time import sleep
 import csv
 
 # set up csv read
@@ -26,4 +27,6 @@ with open('redirect_urls.csv', 'r') as csv_file:
       # output
       print(f'{url}{status}')
       write_csv.writerow([f'{url}', f'{status}'])
+
+      # sleep(2)
 
